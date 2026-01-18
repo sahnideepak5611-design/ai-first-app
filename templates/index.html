@@ -21,7 +21,7 @@ function start() {
     let recognition = new webkitSpeechRecognition();
     recognition.lang = "hi-IN";
 
-    recognition.onresult = function(event) {
+    recognition.onresultconsole.log("User said:", spoken); = function(event) {
         let spoken = event.results[0][0].transcript;
         document.getElementById("text").innerText = "तुम: " + spoken;
 
