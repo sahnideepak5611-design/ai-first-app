@@ -1,33 +1,43 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Voice AI</title>
+    <title>Gemini Voice AI</title>
 </head>
 <body>
 
-<h2>🎤 Voice AI Assistant</h2>
-<button onclick="start()">🎙️ बोलो</button>
+<h2>🎤 Gemini Voice Assistant</h2>
+<button onclick="start()">बोलो</button>
 <p id="text"></p>
+<p id="reply"></p>
 
 <script>
 function speak(text) {
-  let msg = new SpeechSynthesisUtterance(text);
-  window.speechSynthesis.speak(msg);
+    let msg = new SpeechSynthesisUtterance(text);
+    msg.lang = "hi-IN";
+    window.speechSynthesis.speak(msg);
 }
 
 function start() {
-  speak("Hello Deepak, बोलो मैं सुन रहा हूँ");
+    let recognition = new webkitSpeechRecognition();
+    recognition.lang = "hi-IN";
 
-  let recognition = new webkitSpeechRecognition();
-  recognition.lang = "hi-IN";
+    recognition.onresult = function(event) {
+        let spoken = event.results[0][0].transcript;
+        document.getElementById("text").innerText = "तुम: " + spoken;
 
-  recognition.onresult = function(event) {
-    let spoken = event.results[0][0].transcript;
-    document.getElementById("text").innerText = spoken;
-    speak("तुमने कहा " + spoken);
-  };
+        fetch("/chat", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({ text: spoken })
+        })
+        .then(res => res.json())
+        .then(data => {
+            document.getElementById("reply").innerText = "AI: " + data.reply;
+            speak(data.reply);
+        });
+    };
 
-  recognition.start();
+    recognition.start();
 }
 </script>
 
