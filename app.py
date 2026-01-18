@@ -1,10 +1,10 @@
-from flask import Flask, request, jsonify, render_template
-import os
+from flask import Flask, render_template, request, jsonify
 import google.generativeai as genai
+import os
 
 app = Flask(__name__)
 
-# Gemini API key from Render Environment
+# Gemini API key Render Environment se aayegi
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
 model = genai.GenerativeModel("gemini-pro")
@@ -17,12 +17,23 @@ def home():
 def chat():
     user_text = request.json.get("text")
 
-    try:
-        response = model.generate_content(user_text)
-        return jsonify({"reply": response.text})
-    except Exception as e:
-        return jsonify({"reply": "मुझे समझ नहीं आया, फिर से बोलो"})
+    if not user_text:
+        return jsonify({"reply": "कुछ बोला नहीं गया"})
 
+    prompt = f"""
+    तुम एक smart AI assistant हो।
+    सवाल को समझो, नया जवाब दो।
+    repeat मत करना।
+    इंसान की तरह बात करो।
+
+    सवाल: {user_text}
+    """
+
+    response = model.generate_content(prompt)
+
+    return jsonify({
+        "reply": response.text
+    })
 
 if __name__ == "__main__":
-    app.run()
+    app.run(host="0.0.0.0", port=10000)
